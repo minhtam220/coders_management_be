@@ -6,24 +6,7 @@ const taskController = {};
 //create a task
 //validation added
 taskController.createTask = async (req, res, next) => {
-  //validate inputs
   const { name, description } = req.body;
-  // check if 'name' is provided and is a non-empty string
-  if (!name || typeof name !== "string" || name.trim().length === 0) {
-    return res
-      .status(400)
-      .json({ error: "name is required and must be a non-empty string" });
-  }
-  // check if 'description' is provided and is a non-empty string
-  if (
-    !description ||
-    typeof description !== "string" ||
-    name.trim().length === 0
-  ) {
-    return res.status(400).json({
-      error: "description is required and must be a non-empty string",
-    });
-  }
 
   try {
     //prepare the info
@@ -40,14 +23,14 @@ taskController.createTask = async (req, res, next) => {
       throw new AppError(400, "Bad Request", "ERROR. new task NOT created");
 
     //execute the query
-    const created = await Task.create(info);
+    const createdTask = await Task.create(info);
 
     //send the response
     sendResponse(
       res,
       200,
       true,
-      { data: created },
+      { data: createdTask },
       null,
       "new task created successfully"
     );
@@ -60,21 +43,9 @@ taskController.createTask = async (req, res, next) => {
 //get all tasks
 //validation added
 taskController.getAllTasks = async (req, res, next) => {
-  //validate inputs
-  const allowedFilter = ["search", "page", "limit"];
-  let { search, page, limit, ...filterQuery } = req.query;
+  let { search, page, limit } = req.query;
 
-  //allow title,limit and page query string only
-  const filterKeys = Object.keys(filterQuery);
-
-  filterKeys.forEach((key) => {
-    if (!allowedFilter.includes(key)) {
-      const exception = new Error(`Query ${key} is not allowed`);
-      exception.statusCode = 401;
-      throw exception;
-    }
-  });
-
+  search = new RegExp(search);
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 5;
 
@@ -154,14 +125,6 @@ taskController.updateTask = async (req, res, next) => {
   }
 
   //validate the task status
-  // if 'status' is provided, check if it is a valid role value
-  if (
-    status &&
-    !["pending", "working", "review", "done", "archived"].includes(status)
-  ) {
-    return res.status(400).json({ error: "Invalid status" });
-  }
-
   if (
     foundTask.status === "done" &&
     ["pending", "working", "review"].includes(status)
@@ -170,14 +133,6 @@ taskController.updateTask = async (req, res, next) => {
       error:
         "when the status is set to done, it can't be changed to other value except archived.",
     });
-  }
-
-  //valdate the user id
-  const foundUser = await User.findById(assignee);
-  if (!foundUser) {
-    const exception = new Error(`invalid user id`);
-    exception.statusCode = 401;
-    throw exception;
   }
 
   try {

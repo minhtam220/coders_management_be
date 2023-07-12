@@ -8,17 +8,6 @@ const userController = {};
 userController.createUser = async (req, res, next) => {
   //validate inputs
   const { name, role } = req.body;
-  // check if 'name' is provided and is a non-empty string
-  if (!name || typeof name !== "string" || name.trim().length === 0) {
-    return res
-      .status(400)
-      .json({ error: "Name is required and must be a non-empty string" });
-  }
-
-  // if 'role' is provided, check if it is a valid role value
-  if (role && !["employee", "manager"].includes(role)) {
-    return res.status(400).json({ error: "Invalid role value" });
-  }
 
   try {
     //prepare the info
@@ -28,7 +17,7 @@ userController.createUser = async (req, res, next) => {
     };
 
     //check the info
-    if (!info) throw new AppError(402, "Bad Request", "new user NOT created");
+    if (!info) throw new AppError(400, "Bad Request", "new user NOT created");
 
     //execute the query
     const createdUser = await User.create(info);
@@ -51,21 +40,9 @@ userController.createUser = async (req, res, next) => {
 //get all users
 //validation added
 userController.getAllUsers = async (req, res, next) => {
-  //validate inputs
-  const allowedFilter = ["search", "page", "limit"];
-  let { search, page, limit, ...filterQuery } = req.query;
+  let { search, page, limit } = req.query;
 
-  //allow title,limit and page query string only
-  const filterKeys = Object.keys(filterQuery);
-
-  filterKeys.forEach((key) => {
-    if (!allowedFilter.includes(key)) {
-      const exception = new Error(`Query ${key} is not allowed`);
-      exception.statusCode = 401;
-      throw exception;
-    }
-  });
-
+  search = new RegExp(search);
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 5;
 
@@ -105,7 +82,6 @@ userController.getAllUsers = async (req, res, next) => {
 //get a user by id
 //validation added
 userController.getUserById = async (req, res, next) => {
-  //validate input no need here
   const { id } = req.params;
 
   try {
@@ -156,40 +132,24 @@ userController.getTasksByUserId = async (req, res, next) => {
 //update a user
 //validation added
 userController.updateUserById = async (req, res, next) => {
-  //validate inputs
-  const allowedFilter = ["name"];
   const { id } = req.params;
-  const { name } = req.body;
-
-  //allow title,limit and page query string only
-  const filterKeys = Object.keys(filterQuery);
-
-  filterKeys.forEach((key) => {
-    if (!allowedFilter.includes(key)) {
-      const exception = new Error(`Update ${key} is not allowed`);
-      exception.statusCode = 401;
-      throw exception;
-    }
-  });
-
-  // check if 'name' is provided and is a non-empty string
-  if (!name || typeof name !== "string" || name.trim().length === 0) {
-    return res
-      .status(400)
-      .json({ error: "Name is required and must be a non-empty string" });
-  }
+  const { name, role } = req.body;
 
   try {
+    //find the user
+    const foundUser = await User.findById(id);
+
     //prepare the info
     const info = {
-      name: name,
+      name: name ? name : foundUser.name,
+      role: role ? role : foundUser.role,
     };
 
     //options allow you to modify query. e.g new true return lastest update of data
     const options = { new: true };
 
-    //execute the query
-    const updatedUser = await User.findByIdAndUpdate(id, info, options);
+    //update the user
+    updatedUser = await User.findByIdAndUpdate(id, info, options);
 
     //send the response
     sendResponse(
