@@ -4,6 +4,7 @@ const {
   createTask,
   getAllTasks,
   getTaskById,
+  assignTask,
   updateTask,
   deleteTaskById,
 } = require("../controllers/task.controllers.js");
@@ -26,11 +27,15 @@ router.post(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
 
-    // If validation passes, call the "createUser" function
+    // If validation passes, call the "createTask" function
     createTask(req, res);
   }
 );
@@ -56,15 +61,20 @@ router.get(
       }
       return true;
     }),
-    query("page").optional().isNumeric().withMessage("page must be numeric"),
+    query("page").optional().isNumeric().withMessage("Page must be numeric"),
     query("limit").optional().isNumeric().withMessage("Limit must be numeric"),
   ],
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "getAllUsers" function
     getAllTasks(req, res);
   }
@@ -85,30 +95,63 @@ router.get(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "getUserById" function
     getTaskById(req, res);
   }
 );
 
-// Update
+// Assign a task
 /**
- * @route PUT /api/tasks/:id
+ * @route PUT /api/tasks/:id/assignee
  * @description assign (when userId available) or unassign a task (when userId empty)
- * and update a task status
  * @access public
  */
 router.put(
-  "/:id",
+  "/:id/assignee",
   [
     // Add validation rules using Express Validator
     param("id").isMongoId().withMessage("id is invalid"),
     body("assignee")
-      .optional()
+      .optional({ nullable: true })
       .isMongoId()
       .withMessage("assignee id is invalid"),
+  ],
+
+  (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
+    }
+
+    // If validation passes, call the "assignTask" function
+    assignTask(req, res);
+  }
+);
+
+// Update a task
+/**
+ * @route PUT /api/tasks/:id
+ * @description update a task status
+ * @access public
+ */
+router.put(
+  "/:id/status",
+  [
+    // Add validation rules using Express Validator
+    param("id").isMongoId().withMessage("id is invalid"),
     body("status")
       .optional()
       .isIn(["pending", "working", "review", "done", "archived"])
@@ -118,9 +161,14 @@ router.put(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "updateTask" function
     updateTask(req, res);
   }
@@ -141,9 +189,14 @@ router.delete(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "deleteTaskById" function
     deleteTaskById(req, res);
   }

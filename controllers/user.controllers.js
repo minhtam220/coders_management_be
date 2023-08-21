@@ -6,45 +6,51 @@ const userController = {};
 //create a user
 //validation added
 userController.createUser = async (req, res, next) => {
-  //validate inputs
+  //get inputs
   const { name, role } = req.body;
 
   try {
+    //check for existing user
+    const user = await User.findOne({ name });
+
+    if (user)
+      return res
+        .status(400)
+        .json({ success: false, message: "Name already taken" });
+
     //prepare the info
     const info = {
       name: name,
       role: role ? role : "employee",
     };
 
-    //check the info
-    if (!info) throw new AppError(400, "Bad Request", "new user NOT created");
-
     //execute the query
-    const createdUser = await User.create(info);
+    const newUser = await User.create(info);
 
     //send the response
-    sendResponse(
-      res,
-      200,
-      true,
-      { data: createdUser },
-      null,
-      "new user created successfully"
-    );
+    return res.json({
+      success: true,
+      message: "User created successfully",
+      data: newUser,
+    });
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
 //get all users
 //validation added
 userController.getAllUsers = async (req, res, next) => {
+  //get inputs
   let { search, page, limit } = req.query;
 
   search = new RegExp(search);
   page = parseInt(page) || 1;
-  limit = parseInt(limit) || 5;
+  limit = parseInt(limit) || 10;
 
   // calculate the number of documents to skip based on the page and limit
   const skipCount = (page - 1) * limit;
@@ -65,23 +71,25 @@ userController.getAllUsers = async (req, res, next) => {
     const listOfFound = await User.find(filter).skip(skipCount).limit(limit);
 
     //send the response
-    sendResponse(
-      res,
-      200,
-      true,
-      { data: listOfFound, total: totalPages },
-      null,
-      "users retrieved successfully"
-    );
+    return res.json({
+      success: true,
+      message: "User list retrieved successfully",
+      data: listOfFound,
+      totalCount: totalCount,
+    });
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
 //get a user by id
 //validation added
 userController.getUserById = async (req, res, next) => {
+  //get inputs
   const { id } = req.params;
 
   try {
@@ -89,24 +97,24 @@ userController.getUserById = async (req, res, next) => {
     const listOfFound = await User.findById(id);
 
     //send the response
-    sendResponse(
-      res,
-      200,
-      true,
-      { data: listOfFound },
-      null,
-      "user profile retrieved successfully"
-    );
+    return res.json({
+      success: true,
+      message: "User retrieved successfully",
+      data: listOfFound,
+    });
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
 //get all tasks of a user
 //validated added
 userController.getTasksByUserId = async (req, res, next) => {
-  //validate input no need here
+  //get inputs
   const { id } = req.params;
   const filter = { assignee: id };
 
@@ -115,23 +123,24 @@ userController.getTasksByUserId = async (req, res, next) => {
     const listOfFound = await Task.find(filter);
 
     //send the response
-    sendResponse(
-      res,
-      200,
-      true,
-      { data: listOfFound },
-      null,
-      "user tasks retrieved successfully"
-    );
+    return res.json({
+      success: true,
+      message: "User's tasks retrieved successfully",
+      data: listOfFound,
+    });
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
 //update a user
 //validation added
 userController.updateUserById = async (req, res, next) => {
+  //get inputs
   const { id } = req.params;
   const { name, role } = req.body;
 
@@ -152,24 +161,24 @@ userController.updateUserById = async (req, res, next) => {
     updatedUser = await User.findByIdAndUpdate(id, info, options);
 
     //send the response
-    sendResponse(
-      res,
-      200,
-      true,
-      { data: updatedUser },
-      null,
-      "user updated successfully"
-    );
+    return res.json({
+      success: true,
+      message: "User updated successfully",
+      data: updatedUser,
+    });
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
 //delete a user
 //validation added
 userController.deleteUserById = async (req, res, next) => {
-  //validate input no need here
+  //get inputs
   const { id } = req.params;
 
   try {
@@ -180,17 +189,17 @@ userController.deleteUserById = async (req, res, next) => {
     const deletedUser = await User.findByIdAndDelete(id, options);
 
     //send the response
-    sendResponse(
-      res,
-      200,
-      true,
-      { data: deletedUser },
-      null,
-      "user deleted successfully"
-    );
+    return res.json({
+      success: true,
+      message: "User deleted successfully",
+      data: deletedUser,
+    });
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 

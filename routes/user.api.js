@@ -31,8 +31,12 @@ router.post(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
 
     // If validation passes, call the "createUser" function
@@ -61,15 +65,20 @@ router.get(
       }
       return true;
     }),
-    query("page").optional().isNumeric().withMessage("page must be numeric"),
+    query("page").optional().isNumeric().withMessage("Page must be numeric"),
     query("limit").optional().isNumeric().withMessage("Limit must be numeric"),
   ],
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "getAllUsers" function
     getAllUsers(req, res);
   }
@@ -90,9 +99,14 @@ router.get(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "getUserById" function
     getUserById(req, res);
   }
@@ -113,9 +127,14 @@ router.get(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "getTasksByUserId" function
     getTasksByUserId(req, res);
   }
@@ -141,9 +160,14 @@ router.put(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "updateUserById" function
     updateUserById(req, res);
   }
@@ -164,9 +188,14 @@ router.delete(
   (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        message: errors.array().map((error) => error.msg),
+      });
     }
+
     // If validation passes, call the "deleteUserById" function
     deleteUserById(req, res);
   }

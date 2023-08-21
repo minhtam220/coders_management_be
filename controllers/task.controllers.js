@@ -6,6 +6,7 @@ const taskController = {};
 //create a task
 //validation added
 taskController.createTask = async (req, res, next) => {
+  //get inputs
   const { name, description } = req.body;
 
   try {
@@ -18,25 +19,21 @@ taskController.createTask = async (req, res, next) => {
       isDeleted: false,
     };
 
-    //check the info
-    if (!info)
-      throw new AppError(400, "Bad Request", "ERROR. new task NOT created");
-
     //execute the query
-    const createdTask = await Task.create(info);
+    const newTask = await Task.create(info);
 
     //send the response
-    sendResponse(
-      res,
-      200,
-      true,
-      { data: createdTask },
-      null,
-      "new task created successfully"
-    );
+    return res.json({
+      success: true,
+      message: "Task created successfully",
+      data: newTask,
+    });
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
@@ -79,7 +76,10 @@ taskController.getAllTasks = async (req, res, next) => {
     );
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
@@ -104,56 +104,96 @@ taskController.getTaskById = async (req, res, next) => {
     );
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
-//update task
+//assign task
+//validation
+taskController.assignTask = async (req, res, next) => {
+  //get inputs
+  const allowedFilter = ["assignee"];
+  const { id } = req.params;
+  const { assignee } = req.body;
+
+  //validate the task id
+  const task = await Task.findById(id);
+
+  if (!task) {
+    return res.status(400).json({ success: false, message: "Task not found" });
+  }
+
+  try {
+    task.assignee = assignee;
+
+    //execute the query
+    const assignedTask = await task.save();
+
+    //send the response
+    return res.json({
+      success: true,
+      message: "Task assigned/unassigned successfully",
+      data: assignedTask,
+    });
+  } catch (err) {
+    //send the error if any
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
+  }
+};
+
+//update status
 //validation
 taskController.updateTask = async (req, res, next) => {
   //validate inputs
-  const allowedFilter = ["assignee", "status"];
+  const allowedFilter = ["status"];
   const { id } = req.params;
-  const { assignee, status } = req.body;
+  const { status } = req.body;
 
   //validate the task id
-  const foundTask = await Task.findById(id);
-  if (!foundTask) {
-    const exception = new Error(`invalid task id`);
-    exception.statusCode = 401;
-    throw exception;
+  const task = await Task.findById(id);
+
+  if (!task) {
+    return res.status(400).json({ success: false, message: "Task not found" });
   }
 
   //validate the task status
   if (
-    foundTask.status === "done" &&
+    task.status === "done" &&
     ["pending", "working", "review"].includes(status)
   ) {
-    return res.status(400).json({
-      error:
-        "when the status is set to done, it can't be changed to other value except archived.",
-    });
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message:
+          "when the status is set to done, it can't be changed to other value except archived.",
+      });
   }
 
   try {
-    foundTask.assignee = assignee;
-    foundTask.status = status;
+    task.status = status;
 
     //execute the query
-    const updatedTask = await foundTask.save();
+    const updatedTask = await task.save();
 
     //send the response
-    sendResponse(
-      res,
-      200,
-      true,
-      { data: updatedTask },
-      null,
-      "task updated successfully"
-    );
+    return res.json({
+      success: true,
+      message: "Status updated successfully",
+      data: updatedTask,
+    });
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
@@ -184,7 +224,10 @@ taskController.deleteTaskById = async (req, res, next) => {
     );
   } catch (err) {
     //send the error if any
-    next(err);
+    //console.log(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error", error: err });
   }
 };
 
