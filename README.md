@@ -21,7 +21,6 @@ The Back End provides the API to manage users and tasks.
 ## API Routes
 
 ### Get All Users
-
 - **Route:** `GET /users`
 - **Description:** Retrieves a list of all users.
 - **Response:**
@@ -63,7 +62,6 @@ The Back End provides the API to manage users and tasks.
   ```
 
 ### Get User by ID
-
 - **Route:** `GET /users/:id`
 - **Description:** Retrieves a specific user by their ID.
 - **Parameters:**
@@ -87,7 +85,6 @@ The Back End provides the API to manage users and tasks.
     ```
 
 ### Create a New User
-
 - **Route:** `POST /users`
 - **Description:** Creates a new user.
 - **Request Body:**
@@ -116,7 +113,6 @@ The Back End provides the API to manage users and tasks.
     ```
 
 ### Update a User
-
 - **Route:** `PUT /users/:id`
 - **Description:** Updates a user.
 - **Request Body:**
@@ -231,7 +227,6 @@ The Back End provides the API to manage users and tasks.
     ```
 
 ### Get Task by ID
-
 - **Route:** `GET /tasks/:id`
 - **Description:** Retrieves a specific task by their ID.
 - **Parameters:**
@@ -259,7 +254,6 @@ The Back End provides the API to manage users and tasks.
     ```
 
 ### Create a New Task
-
 - **Route:** `POST /tasks`
 - **Description:** Creates a new task.
 - **Request Body:**
@@ -291,7 +285,6 @@ The Back End provides the API to manage users and tasks.
     ```
 
 ### Assign a Task
-
 - **Route:** `PUT /tasks/:id/assignee`
 - **Description:** Assign (when userId available) or unassign a task (when userId empty).
 - **Request Body:**
@@ -351,7 +344,6 @@ The Back End provides the API to manage users and tasks.
     }
     ```
   
-
 ### Delete a Task
 - **Route:** `DELETE /tasks/:id`
 - **Description:** Delete a task.
@@ -361,20 +353,22 @@ The Back End provides the API to manage users and tasks.
     ```json
     {
       "success": true,
-      "message": "Status updated successfully",
       "data": {
-        "_id": "65083ea4e05640a1dd8b54ee",
-        "name": "sing a song",
-        "description": "sing a song",
-        "status": "working",
-        "assignee": "64e36bf8fd02662b832c6ba3",
-        "isDeleted": false,
-        "createdAt": "2023-09-18T12:12:20.554Z",
-        "updatedAt": "2023-09-18T12:18:02.156Z",
-        "__v": 0
-      }
+        "data": {
+          "_id": "65083ea4e05640a1dd8b54ee",
+          "name": "sing a song",
+          "description": "sing a song",
+          "status": "working",
+          "assignee": "64e36bf8fd02662b832c6ba3",
+          "isDeleted": true,
+          "createdAt": "2023-09-18T12:12:20.554Z",
+          "updatedAt": "2023-09-18T12:29:04.167Z",
+          "__v": 0
+        }
+      },
+      "message": "task deleted successfully"
     }
-
+    ```
   
 
 
